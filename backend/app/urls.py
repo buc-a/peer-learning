@@ -15,14 +15,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
 # когда неотдавалась админка помогло python manage.py collectstatic
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/login/', views.login_view, name='api-login'),
+    path('api/logout/', views.logout_view, name='api-logout'),
+    path('api/', include('chat.urls')),
 ] 
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
