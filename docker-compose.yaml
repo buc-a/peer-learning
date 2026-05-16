@@ -23,8 +23,15 @@ services:
       - ./backend:/usr/src/app
     expose:
       - 8000
-    ports:
-      - 8000:8000
     depends_on:
       db:
         condition: service_healthy
+
+  nginx:
+    image: nginx:1.25
+    volumes:
+      - ./nginx:/etc/nginx/
+    ports:
+      - 9000:80
+    depends_on:
+      - backend
