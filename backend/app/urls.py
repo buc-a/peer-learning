@@ -26,7 +26,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/login/', views.login_view, name='api-login'),
     path('api/logout/', views.logout_view, name='api-logout'),
-    path('api/', include('chat.urls')),
+    path('api/csrf/', views.get_csrf, name='api-csrf'),
+    path('api/', include('chat.urls'))
 ] 
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

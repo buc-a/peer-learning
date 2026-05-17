@@ -3,7 +3,11 @@ import json
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.middleware.csrf import get_token
 
+
+def get_csrf(request):
+    return JsonResponse({}, headers={'X-CSRFToken': get_token(request)})
 
 @require_POST
 def login_view(request):

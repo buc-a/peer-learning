@@ -35,3 +35,13 @@ services:
       - 9000:80
     depends_on:
       - backend
+
+  frontend:
+    stdin_open: true
+    build: ./frontend
+    expose:
+      - 5173
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - backend
