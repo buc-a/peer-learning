@@ -1,6 +1,9 @@
 {
-  "log" : {
+  "log": {
     "level": "debug"
+  },
+  "http_server": {
+    "address": "0.0.0.0"
   },
   "client": {
     "token": {
@@ -16,7 +19,10 @@
   "channel": {
     "namespaces": [
       {
-        "name": "personal"
+        "name": "personal",
+        "history_size": 300,
+        "history_ttl": "600s",
+        "force_recovery": true
       }
     ]
   }

@@ -26,6 +26,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+        
   migrations:
     build: ./backend
     restart: on-failure
@@ -34,7 +35,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-        
   nginx:
     image: nginx:1.25
     volumes:

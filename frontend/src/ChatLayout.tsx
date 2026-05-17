@@ -15,8 +15,8 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({ children, realTimeStatus, unrec
   return (
     <div id='chat-layout'>
       <div id='chat-navbar'>
-        <NavLink to={`/`} className={({ isActive }) => isActive ? "navbar-active-link" : ""}>My rooms</NavLink>
-        <NavLink to={`/search`} className={({ isActive }) => isActive ? "navbar-active-link" : ""}>Discover</NavLink>
+        <NavLink to={`/`} className={({ isActive }) => isActive ? "navbar-active-link" : ""}>My chats</NavLink>
+        <NavLink to={`/search`} className={({ isActive }) => isActive ? "navbar-active-link" : ""}>New chat</NavLink>
         <span id="logout-container">
           <span id="status" className={'status-'+ realTimeStatus}>{realTimeStatus}</span>
           &nbsp;

@@ -19,10 +19,8 @@ export const login = async (csrfToken: string, username: string, password: strin
   return response.data
 }
 
-export const logout = async (csrfToken: string, deviceId: string) => {
-  await axios.post(`${API_ENDPOINT_BASE}/api/logout/`, {
-    'device_id': deviceId
-  }, {
+export const logout = async (csrfToken: string) => {
+  await axios.post(`${API_ENDPOINT_BASE}/api/logout/`, {}, {
     headers: {
       "X-CSRFToken": csrfToken
     }
@@ -42,30 +40,17 @@ export const getSubscriptionToken = async (channel: string) => {
 }
 
 export const getRooms = async () => {
-  const response = await axios.get(`${API_ENDPOINT_BASE}/api/rooms/`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-  });
-  return response.data.results
-};
-
-export const searchRooms = async () => {
-  const response = await axios.get(`${API_ENDPOINT_BASE}/api/search/`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-  });
+  const response = await axios.get(`${API_ENDPOINT_BASE}/api/rooms/`, {});
   return response.data.results
 };
 
 export const getRoom = async (roomId: string) => {
-  const response = await axios.get(`${API_ENDPOINT_BASE}/api/rooms/${roomId}/`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-  });
+  const response = await axios.get(`${API_ENDPOINT_BASE}/api/rooms/${roomId}/`, {});
   return response.data
 };
 
 export const getMessages = async (roomId: string) => {
-  const response = await axios.get(`${API_ENDPOINT_BASE}/api/rooms/${roomId}/messages/`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-  })
+  const response = await axios.get(`${API_ENDPOINT_BASE}/api/rooms/${roomId}/messages/`, {})
   return response.data.results
 }
 
@@ -80,27 +65,24 @@ export const addMessage = async (csrfToken: string, roomId: string, content: str
   return response.data
 }
 
-export const joinRoom = async (csrfToken: string, roomId: string) => {
-  const response = await axios.post(`${API_ENDPOINT_BASE}/api/rooms/${roomId}/join/`, {}, {
-    headers: {
-      'X-CSRFToken': csrfToken
-    }
+/**
+ * Search for users to start a 1-on-1 chat with.
+ * Optional query param q filters by username.
+ */
+export const searchUsers = async (q?: string) => {
+  const response = await axios.get(`${API_ENDPOINT_BASE}/api/users/`, {
+    params: q ? { q } : {}
   });
-  return response.data
-}
+  return response.data.results
+};
 
-export const leaveRoom = async (csrfToken: string, roomId: string) => {
-  const response = await axios.post(`${API_ENDPOINT_BASE}/api/rooms/${roomId}/leave/`, {}, {
-    headers: {
-      'X-CSRFToken': csrfToken
-    }
-  });
-  return response.data
-}
-
-export const registerDevice = async (csrfToken: string, deviceInfo: any) => {
-  const response = await axios.post(`${API_ENDPOINT_BASE}/api/device/register/`, {
-    'device': deviceInfo
+/**
+ * Start (or retrieve) a 1-on-1 chat room with the given user.
+ * Returns the room object.
+ */
+export const startChat = async (csrfToken: string, userId: number) => {
+  const response = await axios.post(`${API_ENDPOINT_BASE}/api/chats/start/`, {
+    user_id: userId
   }, {
     headers: {
       'X-CSRFToken': csrfToken

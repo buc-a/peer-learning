@@ -1,8 +1,6 @@
 import json
 import jwt
 import time
-import requests
-import logging
 
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
@@ -45,6 +43,7 @@ def get_subscription_token(request):
 
     return JsonResponse({'token': token})
 
+
 @require_POST
 def login_view(request):
     credentials = json.loads(request.body)
@@ -59,7 +58,8 @@ def login_view(request):
         return JsonResponse({'detail': 'invalid credentials'}, status=400)
 
     login(request, user)
-    return JsonResponse({'user': {'id': user.pk, 'username': user.username}})
+    return JsonResponse({'id': user.pk, 'username': user.username})
+
 
 @require_POST
 def logout_view(request):
@@ -68,39 +68,3 @@ def logout_view(request):
 
     logout(request)
     return JsonResponse({})
-
-
-@require_POST
-def device_register_view(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'detail': 'must be authenticated'}, status=403)
-
-    device_info = json.loads(request.body).get('device')
-    if not device_info:
-        return JsonResponse({'detail': 'device not found'}, status=400)
-
-    # Attach user ID to device info.
-    device_info["user"] = str(request.user.pk)
-
-    session = requests.Session()
-    try:
-        resp = session.post(
-            settings.CENTRIFUGO_HTTP_API_ENDPOINT + '/api/device_register',
-            data=json.dumps(device_info),
-            headers={
-                'Content-type': 'application/json',
-                'X-API-Key': settings.CENTRIFUGO_HTTP_API_KEY,
-                'X-Centrifugo-Error-Mode': 'transport'
-            }
-        )
-    except requests.exceptions.RequestException as e:
-        logging.error(e)
-        return JsonResponse({'detail': 'failed to register device'}, status=500)
-
-    if resp.status_code != 200:
-        logging.error(resp.json())
-        return JsonResponse({'detail': 'failed to register device'}, status=500)
-
-    return JsonResponse({
-        'device_id': resp.json().get('result', {}).get('id')
-    })
