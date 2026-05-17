@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from .serializers import RoomSerializer, UserSerializer, MessageSerializer
+from .models import Room, RoomMember
 from django.db import transaction
 
 class RoomListViewSet(ListModelMixin, GenericViewSet):
