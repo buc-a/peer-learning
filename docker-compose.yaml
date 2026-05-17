@@ -35,6 +35,8 @@ services:
       - 9000:80
     depends_on:
       - backend
+      - centrifugo
+      - frontend
 
   frontend:
     stdin_open: true
@@ -45,3 +47,27 @@ services:
       - NODE_ENV=development
     depends_on:
       - backend
+
+  centrifugo:
+    image: centrifugo/centrifugo:v6
+    restart: unless-stopped
+    volumes:
+      - ./centrifugo:/centrifugo
+    command: centrifugo -c config.json
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:${REDIS_VERSION:-7}-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 10

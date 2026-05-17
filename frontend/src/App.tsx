@@ -18,8 +18,8 @@ import { WS_ENDPOINT, LOCAL_STORAGE_AUTH_INFO_KEY, LOCAL_STORAGE_DEVICE_ID_KEY }
 import { initializeFirebase, requestNotificationToken, onForegroundNotification, removeNotificationToken } from './PushNotification';
 
 import {
-  Centrifuge, PublicationContext, SubscriptionStateContext,
-  SubscribedContext, SubscriptionState
+  Centrifuge, type PublicationContext, type SubscriptionStateContext,
+  type SubscribedContext, SubscriptionState
 } from 'centrifuge';
 
 const initialChatState = {
