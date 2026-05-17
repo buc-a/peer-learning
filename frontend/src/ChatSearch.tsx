@@ -1,105 +1,75 @@
 import { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CsrfContext from './CsrfContext';
 import ChatContext from './ChatContext';
-import { joinRoom, leaveRoom, searchRooms } from './AppApi';
+import { searchUsers, startChat } from './AppApi';
 
 interface ChatSearchProps {
-  fetchRoom: (roomId: string) => Promise<void>
+  fetchRoom: (roomId: string) => Promise<any>
 }
 
 const ChatSearch: React.FC<ChatSearchProps> = ({ fetchRoom }) => {
   const csrf = useContext(CsrfContext);
-  const { state, dispatch } = useContext(ChatContext);
-  const [rooms, setRooms] = useState<any>([]);
-  const [loading, setLoading] = useState<any>({})
-
-  const setLoadingFlag = (roomId: any, value: boolean) => {
-    setLoading((prev: any) => ({
-      ...prev,
-      [roomId]: value
-    }));
-  };
-
-  const onJoin = async (roomId: any) => {
-    setLoadingFlag(roomId, true)
-    try {
-      await joinRoom(csrf, roomId)
-      const room = await fetchRoom(roomId)
-      dispatch({
-        type: "ADD_ROOMS", payload: {
-          rooms: [room]
-        }
-      })
-      setRooms(rooms.map((room: any) => 
-        room.id === roomId
-          ? { ...room, is_member: true }
-          : room
-      ))
-    } catch (e) {
-      console.log(e)
-    }
-    setLoadingFlag(roomId, false)
-  };
-
-  const onLeave = async (roomId: any) => {
-    setLoadingFlag(roomId, true)
-    try {
-      await leaveRoom(csrf, roomId)
-      dispatch({
-        type: "DELETE_ROOM", payload: {
-          roomId: roomId
-        }
-      })
-      setRooms(rooms.map((room: any) => 
-        room.id === roomId
-          ? { ...room, is_member: false }
-          : room
-      ))
-    } catch (e) {
-      console.log(e)
-    }
-    setLoadingFlag(roomId, false)
-  };
+  const { dispatch } = useContext(ChatContext);
+  const navigate = useNavigate();
+  const [users, setUsers] = useState<any[]>([]);
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    const fetchRooms = async () => {
-      const rooms = await searchRooms()
-      setRooms(rooms)
+    const fetchUsers = async () => {
+      const result = await searchUsers(query || undefined);
+      setUsers(result);
     };
-    fetchRooms();
-  }, []);
+    fetchUsers();
+  }, [query]);
+
+  const setLoadingFlag = (userId: number, value: boolean) => {
+    setLoading(prev => ({ ...prev, [userId]: value }));
+  };
+
+  const onStartChat = async (userId: number) => {
+    setLoadingFlag(userId, true);
+    try {
+      const room = await startChat(csrf, userId);
+      dispatch({
+        type: 'ADD_ROOMS',
+        payload: { rooms: [room] }
+      });
+      navigate(`/rooms/${room.id}`);
+    } catch (e) {
+      console.error(e);
+    }
+    setLoadingFlag(userId, false);
+  };
 
   return (
     <div id="chat-rooms">
-      {rooms.map((room: any) => {
-        const roomState = state.roomsById[room.id]
-        let isMember: boolean;
-        if (roomState === null) {
-          isMember = false
-        } else if (roomState !== undefined) {
-          isMember = true
-        } else {
-          isMember = room.is_member
-        }
-        return <div className={`chat-room-block ${(isMember) ? 'member' : 'not-member'}`} key={room.id}>
-          <div className='room-search-item'>
-            <span>
-              {room.name}
-            </span>
+      <div id="user-search-bar">
+        <input
+          type="text"
+          placeholder="Search users..."
+          value={query}
+          onChange={e => setQuery(e.currentTarget.value)}
+          autoComplete="off"
+        />
+      </div>
+      {users.map((user: any) => (
+        <div className="chat-room-block" key={user.id}>
+          <div className="room-search-item">
+            <span>{user.username}</span>
             <span className="room-actions">
-              <button disabled={loading[room.id] === true} className={`${(isMember) ? 'member' : 'not-member'} ${(loading[room.id]) ? 'loading' : ''}`} onClick={() => {
-                if (isMember) {
-                  onLeave(room.id)
-                } else {
-                  onJoin(room.id)
-                }
-              }}>
-                {(isMember) ? 'Leave' : 'Join'}
+              <button
+                disabled={loading[user.id] === true}
+                className={loading[user.id] ? 'loading' : ''}
+                onClick={() => onStartChat(user.id)}
+              >
+                {loading[user.id] ? '...' : 'Message'}
               </button>
             </span>
           </div>
         </div>
-      })}
+      ))}
     </div>
   );
 };

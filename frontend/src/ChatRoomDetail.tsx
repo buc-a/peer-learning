@@ -3,10 +3,22 @@ import { useParams } from 'react-router-dom';
 import AuthContext from './AuthContext';
 import ChatContext from './ChatContext';
 
+/**
+ * For a 1:1 chat, return the other participant's username.
+ * Falls back to room.name if members are not available.
+ */
+function getChatTitle(room: any, currentUserId: number): string {
+  if (room.members && room.members.length > 0) {
+    const other = room.members.find((m: any) => m.id !== currentUserId);
+    if (other) return other.username;
+  }
+  return room.name || '';
+}
+
 interface ChatRoomDetailProps {
-  fetchRoom: (roomId: string) => Promise<void>
+  fetchRoom: (roomId: string) => Promise<any>
   fetchMessages: (roomId: string) => Promise<any[]>
-  publishMessage: (roomId: string, content: string) => Promise<boolean>
+  publishMessage: (roomId: string, content: string) => Promise<any>
 }
 
 const ChatRoomDetail: React.FC<ChatRoomDetailProps> = ({ fetchRoom, fetchMessages, publishMessage }) => {
@@ -67,16 +79,12 @@ const ChatRoomDetail: React.FC<ChatRoomDetailProps> = ({ fetchRoom, fetchMessage
   const room = state.roomsById[id] || {};
   const messages = state.messagesByRoomId[id] || [];
 
-  const messagesEndRef = useRef<any>(null); // Ref for the messages container
+  const messagesEndRef = useRef<any>(null);
 
   const scrollToBottom = () => {
     const container = messagesEndRef.current;
     if (container) {
-      const scrollOptions = {
-        top: container.scrollHeight,
-        behavior: 'auto'
-      };
-      container.scrollTo(scrollOptions);
+      container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
     }
   };
 
@@ -90,9 +98,7 @@ const ChatRoomDetail: React.FC<ChatRoomDetailProps> = ({ fetchRoom, fetchMessage
 
   const onFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (sendLoading) {
-      return
-    }
+    if (sendLoading) return;
     setSendLoading(true)
     try {
       const message = await publishMessage(id!, content)
@@ -112,7 +118,7 @@ const ChatRoomDetail: React.FC<ChatRoomDetailProps> = ({ fetchRoom, fetchMessage
   const handleScroll = (e: UIEvent<HTMLDivElement>) => {
     const container = (e.target as HTMLElement);
     if (!container) return;
-    const threshold = 40; // Pixels from the bottom to be considered 'near bottom'
+    const threshold = 40;
     const position = container.scrollTop + container.offsetHeight;
     const height = container.scrollHeight;
     setIsAtBottom(position + threshold >= height)
@@ -120,12 +126,11 @@ const ChatRoomDetail: React.FC<ChatRoomDetailProps> = ({ fetchRoom, fetchMessage
 
   const [isAtBottom, setIsAtBottom] = useState(true);
 
-  // Scroll to bottom after layout changes.
   useEffect(() => {
     if (isAtBottom) {
       scrollToBottom();
     }
-  }, [messages, isAtBottom]); // Dependency on messages ensures it runs after messages are updated.
+  }, [messages, isAtBottom]);
 
   return (
     <div id="chat-room">
@@ -136,15 +141,13 @@ const ChatRoomDetail: React.FC<ChatRoomDetailProps> = ({ fetchRoom, fetchMessage
       ) : (
         <>
           <div id="room-description">
-            <span id="room-name">{room.name}</span>
-            <span id="room-member-count">{room.member_count} <span className='chat-room-member-counter-icon'>🐈</span></span>
+            <span id="room-name">{getChatTitle(room, userInfo.id)}</span>
           </div>
           <div id="room-messages" onScroll={handleScroll} ref={messagesEndRef}>
             {messages.map((message: any) => (
               <div key={message.id} className={`room-message ${(userInfo.id == message.user.id) ? 'room-message-mine' : 'room-message-not-mine'}`}>
                 <div className='message-avatar'>
                   <img src={`https://robohash.org/user${message.user.id}.png?set=set4`} alt="" />
-                  {/* <img src={`https://ui-avatars.com/api/?background=random&color=fff&name=${message.user.username}&size=128`} alt="" /> */}
                 </div>
                 <div className='message-bubble'>
                   <div className='message-meta'>
@@ -162,9 +165,16 @@ const ChatRoomDetail: React.FC<ChatRoomDetailProps> = ({ fetchRoom, fetchMessage
               </div>
             ))}
           </div>
-          <div id="chat-input-container" className={`${(sendLoading) ? 'loading' : ''}`}>
+          <div id="chat-input-container" className={`${sendLoading ? 'loading' : ''}`}>
             <form onSubmit={onFormSubmit}>
-              <input type="text" autoComplete="off" value={content} placeholder="Enter message..." onChange={e => setContent(e.currentTarget.value)} required />
+              <input
+                type="text"
+                autoComplete="off"
+                value={content}
+                placeholder="Enter message..."
+                onChange={e => setContent(e.currentTarget.value)}
+                required
+              />
             </form>
           </div>
         </>
