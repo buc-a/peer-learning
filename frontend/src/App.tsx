@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 
 import ChatLogin from './ChatLogin';
@@ -10,6 +10,10 @@ import CsrfContext from './CsrfContext';
 import AuthContext from './AuthContext';
 import ChatContext from './ChatContext';
 import ChatSearch from './ChatSearch';
+import PostList from './PostList';
+import PostDetail from './PostDetail';
+import PostForm from './PostForm';
+import MyPosts from './MyPosts';
 import {
   getConnectionToken, getSubscriptionToken, getCSRFToken,
   logout, addMessage, getRooms, getMessages, getRoom,
@@ -415,15 +419,21 @@ const App: React.FC = () => {
                 onLogout={onLogout}
               >
                 <Routes>
-                  <Route path="/" element={<ChatRoomList />} />
-                  <Route path="/search" element={<ChatSearch fetchRoom={fetchRoom} />} />
-                  <Route path="/rooms/:id" element={
+                  <Route path="/" element={<Navigate to="/posts" />} />
+                  <Route path="/chat" element={<ChatRoomList />} />
+                  <Route path="/chat/search" element={<ChatSearch fetchRoom={fetchRoom} />} />
+                  <Route path="/chat/rooms/:id" element={
                     <ChatRoomDetail
                       fetchRoom={fetchRoom}
                       fetchMessages={fetchMessages}
                       publishMessage={publishMessage}
                     />
                   } />
+                  <Route path="/posts" element={<PostList />} />
+                  <Route path="/posts/new" element={<PostForm />} />
+                  <Route path="/posts/my" element={<MyPosts />} />
+                  <Route path="/posts/:id" element={<PostDetail />} />
+                  <Route path="/posts/:id/edit" element={<PostForm />} />
                 </Routes>
               </ChatLayout>
             </Router>

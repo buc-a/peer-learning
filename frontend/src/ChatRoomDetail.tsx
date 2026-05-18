@@ -147,7 +147,9 @@ const ChatRoomDetail: React.FC<ChatRoomDetailProps> = ({ fetchRoom, fetchMessage
             {messages.map((message: any) => (
               <div key={message.id} className={`room-message ${(userInfo.id == message.user.id) ? 'room-message-mine' : 'room-message-not-mine'}`}>
                 <div className='message-avatar'>
-                  <img src={`https://robohash.org/user${message.user.id}.png?set=set4`} alt="" />
+                  <div className='message-avatar-initial'>
+                    {message.user.username.charAt(0).toUpperCase()}
+                  </div>
                 </div>
                 <div className='message-bubble'>
                   <div className='message-meta'>

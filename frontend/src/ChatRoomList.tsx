@@ -26,7 +26,7 @@ const ChatRoomList = () => {
         const title = getChatTitle(room, userInfo.id);
         return (
           <div className="chat-room-block" key={room.id}>
-            <Link to={`/rooms/${room.id}`}>
+            <Link to={`/chat/rooms/${room.id}`}>
               <div className="left-column">
                 <span className="name">{title}</span>
                 <span className="message-content">

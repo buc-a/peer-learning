@@ -36,7 +36,7 @@ const ChatSearch: React.FC<ChatSearchProps> = ({ fetchRoom }) => {
         type: 'ADD_ROOMS',
         payload: { rooms: [room] }
       });
-      navigate(`/rooms/${room.id}`);
+      navigate(`/chat/rooms/${room.id}`);
     } catch (e) {
       console.error(e);
     }
