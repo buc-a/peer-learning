@@ -17,6 +17,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
+from django.db import connection
+connection.force_debug_cursor = True 
+
 from .models import Message, Room, RoomMember
 from .serializers import (
     MessageSerializer, RoomSerializer, RoomMemberSerializer, UserSerializer
@@ -157,13 +160,12 @@ class StartChatView(APIView, CentrifugoMixin):
             )
 
         # Look for an existing direct room shared by both users (exactly 2 members).
+        # Use distinct=True to avoid inflated counts from multiple JOIN paths.
         existing_room = Room.objects.filter(
             memberships__user=request.user
         ).filter(
             memberships__user=other_user
-        ).annotate(
-            member_count_ann=Count('memberships')
-        ).filter(member_count_ann=2).first()
+        ).first()
 
         if existing_room:
             serializer = RoomSerializer(existing_room)

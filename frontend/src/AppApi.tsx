@@ -90,3 +90,40 @@ export const startChat = async (csrfToken: string, userId: number) => {
   });
   return response.data
 }
+
+// ── Posts ──────────────────────────────────────────────────────────────────
+
+export const getPosts = async (params?: { skill?: string; author?: number }) => {
+  const response = await axios.get(`${API_ENDPOINT_BASE}/api/posts/`, { params });
+  return response.data.results;
+};
+
+export const getMyPosts = async () => {
+  const response = await axios.get(`${API_ENDPOINT_BASE}/api/posts/my/`);
+  return response.data.results;
+};
+
+export const getPost = async (postId: number | string) => {
+  const response = await axios.get(`${API_ENDPOINT_BASE}/api/posts/${postId}/`);
+  return response.data;
+};
+
+export const createPost = async (csrfToken: string, data: { title: string; description: string; skill: string }) => {
+  const response = await axios.post(`${API_ENDPOINT_BASE}/api/posts/`, data, {
+    headers: { 'X-CSRFToken': csrfToken }
+  });
+  return response.data;
+};
+
+export const updatePost = async (csrfToken: string, postId: number | string, data: { title: string; description: string; skill: string }) => {
+  const response = await axios.put(`${API_ENDPOINT_BASE}/api/posts/${postId}/`, data, {
+    headers: { 'X-CSRFToken': csrfToken }
+  });
+  return response.data;
+};
+
+export const deletePost = async (csrfToken: string, postId: number | string) => {
+  await axios.delete(`${API_ENDPOINT_BASE}/api/posts/${postId}/`, {
+    headers: { 'X-CSRFToken': csrfToken }
+  });
+};

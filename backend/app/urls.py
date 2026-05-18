@@ -29,7 +29,8 @@ urlpatterns = [
     path('api/token/connection/', views.get_connection_token, name='api-connection-token'),
     path('api/token/subscription/', views.get_subscription_token, name='api-subscription-token'),
     path('api/csrf/', views.get_csrf, name='api-csrf'),
-    path('api/', include('chat.urls'))
+    path('api/', include('chat.urls')),
+    path('api/', include('post.urls')),
 ] 
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

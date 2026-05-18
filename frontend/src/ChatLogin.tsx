@@ -1,5 +1,4 @@
 import React, { useState, useContext } from 'react';
-import logo from './assets/centrifugo.svg'
 import CsrfContext from './CsrfContext';
 import { login } from './AppApi';
 
@@ -20,7 +19,6 @@ const ChatLogin: React.FC<ChatLoginProps> = ({ onSuccess }) => {
       onSuccess(resp);
     } catch (err) {
       console.error('Login failed:', err);
-      // TODO: handle login errors.
     }
     setLoading(false)
   };
@@ -31,13 +29,14 @@ const ChatLogin: React.FC<ChatLoginProps> = ({ onSuccess }) => {
       handleLogin()
     }}>
       <div id="chat-login-logo-container">
-        <img src={logo} width="100px" height="100px" />
+        <h1 id="chat-login-title">Peer Learning</h1>
+        <p id="chat-login-subtitle">Find someone to learn from or teach</p>
       </div>
       <div className="input-container">
         <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" />
       </div>
       <div className="input-container">
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" autoComplete='curentPassword' />
+        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" autoComplete='currentPassword' />
       </div>
       <div className='login-button-container'>
         <button disabled={loading} className={`${(loading) ? 'loading' : ''}`}>Login</button>
