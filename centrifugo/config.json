@@ -6,15 +6,9 @@
     "address": "0.0.0.0"
   },
   "client": {
-    "token": {
-      "hmac_secret_key": "secret"
-    },
     "allowed_origins": [
       "http://localhost:9000"
     ]
-  },
-  "http_api": {
-    "key": "api_key"
   },
   "channel": {
     "namespaces": [

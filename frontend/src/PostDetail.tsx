@@ -1,14 +1,12 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import CsrfContext from './CsrfContext';
-import AuthContext from './AuthContext';
 import ChatContext from './ChatContext';
 import { getPost, deletePost, startChat } from './AppApi';
 
 const PostDetail = () => {
   const { id } = useParams<{ id: string }>();
   const csrf = useContext(CsrfContext);
-  const userInfo = useContext(AuthContext);
   const { dispatch } = useContext(ChatContext);
   const navigate = useNavigate();
 

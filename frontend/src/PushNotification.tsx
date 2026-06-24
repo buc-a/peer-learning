@@ -1,7 +1,7 @@
-import { getMessaging, getToken, onMessage, deleteToken } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, deleteToken, type Messaging } from 'firebase/messaging';
 import { initializeApp } from 'firebase/app';
 
-let messaging;
+let messaging: Messaging | undefined;
 
 export const initializeFirebase = (firebaseConfig: any) => {
     if (!messaging) {
@@ -14,7 +14,7 @@ export const initializeFirebase = (firebaseConfig: any) => {
     }
 };
 
-export const requestNotificationToken = async (firebaseConfig: any, vapidKey: string): Promise<string | null> => {
+export const requestNotificationToken = async (vapidKey: string): Promise<string | null> => {
     try {
         // Request notification permission.
         const permission = await Notification.requestPermission();
@@ -41,6 +41,11 @@ export const requestNotificationToken = async (firebaseConfig: any, vapidKey: st
             return null;
         }
 
+        if (!messaging) {
+            console.error('Firebase messaging is not initialized.');
+            return null;
+        }
+
         // Get FCM Token.
         const token = await getToken(messaging, {
             vapidKey: vapidKey,
@@ -54,7 +59,7 @@ export const requestNotificationToken = async (firebaseConfig: any, vapidKey: st
     }
 };
 
-export const onForegroundNotification = (callback) => {
+export const onForegroundNotification = (callback: (payload: unknown) => void) => {
     if (messaging) {
         onMessage(messaging, callback);
     }

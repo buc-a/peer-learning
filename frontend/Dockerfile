@@ -1,14 +1,23 @@
-FROM node:22-slim
+# Stage 1: build
+FROM node:22-slim AS builder
 
 WORKDIR /usr/src/app
 
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
-COPY package.json .
+COPY package.json ./
 
-RUN npm i
+RUN npm install
 
 COPY . .
 
-# start app
-CMD ["vite", "--host"]
+RUN npm run build
+
+# Stage 2: serve with nginx
+FROM nginx:1.25-alpine
+
+COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

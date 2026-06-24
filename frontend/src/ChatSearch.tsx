@@ -4,11 +4,7 @@ import CsrfContext from './CsrfContext';
 import ChatContext from './ChatContext';
 import { searchUsers, startChat } from './AppApi';
 
-interface ChatSearchProps {
-  fetchRoom: (roomId: string) => Promise<any>
-}
-
-const ChatSearch: React.FC<ChatSearchProps> = ({ fetchRoom }) => {
+const ChatSearch: React.FC = () => {
   const csrf = useContext(CsrfContext);
   const { dispatch } = useContext(ChatContext);
   const navigate = useNavigate();

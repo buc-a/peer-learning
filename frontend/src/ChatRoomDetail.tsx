@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useRef, UIEvent } from 'react';
+import { useState, useEffect, useContext, useRef, type UIEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import AuthContext from './AuthContext';
 import ChatContext from './ChatContext';

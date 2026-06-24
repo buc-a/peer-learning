@@ -1,11 +1,10 @@
 import { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import CsrfContext from './CsrfContext';
 import { getMyPosts, deletePost } from './AppApi';
 
 const MyPosts = () => {
   const csrf = useContext(CsrfContext);
-  const navigate = useNavigate();
 
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

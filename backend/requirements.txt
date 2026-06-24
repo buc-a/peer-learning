@@ -12,3 +12,7 @@ pytz==2026.2
 requests==2.34.2
 sqlparse==0.5.5
 urllib3==2.7.0
+# Фаззинг-тестирование
+hypothesis==6.131.10
+pytest==8.3.5
+pytest-django==4.11.1

@@ -2,16 +2,18 @@ services:
   db:
     image: postgres:15
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data/
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "grandchat" ]
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}" ]
       interval: 1s
       timeout: 5s
       retries: 10
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=grandchat
-      - POSTGRES_PASSWORD=grandchat
-      - POSTGRES_DB=grandchat
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     expose:
       - 5432
     ports:
@@ -21,6 +23,8 @@ services:
     build: ./backend
     volumes:
       - ./backend:/usr/src/app
+    env_file:
+      - .env
     expose:
       - 8000
     depends_on:
@@ -32,6 +36,8 @@ services:
     restart: on-failure
     command: >
       python manage.py migrate
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
@@ -47,12 +53,9 @@ services:
       - frontend
 
   frontend:
-    stdin_open: true
     build: ./frontend
     expose:
-      - 5173
-    environment:
-      - NODE_ENV=development
+      - 80
     depends_on:
       - backend
 
@@ -62,6 +65,11 @@ services:
     volumes:
       - ./centrifugo:/centrifugo
     command: centrifugo -c config.json
+    environment:
+      - CENTRIFUGO_HTTP_API_KEY=${CENTRIFUGO_API_KEY}
+      - CENTRIFUGO_CLIENT_TOKEN_HMAC_SECRET_KEY=${CENTRIFUGO_TOKEN_SECRET}
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     depends_on:
@@ -79,3 +87,6 @@ services:
       interval: 2s
       timeout: 5s
       retries: 10
+
+volumes:
+  postgres_data:

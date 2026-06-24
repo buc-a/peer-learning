@@ -421,7 +421,7 @@ const App: React.FC = () => {
                 <Routes>
                   <Route path="/" element={<Navigate to="/posts" />} />
                   <Route path="/chat" element={<ChatRoomList />} />
-                  <Route path="/chat/search" element={<ChatSearch fetchRoom={fetchRoom} />} />
+                  <Route path="/chat/search" element={<ChatSearch />} />
                   <Route path="/chat/rooms/:id" element={
                     <ChatRoomDetail
                       fetchRoom={fetchRoom}

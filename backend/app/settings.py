@@ -2,6 +2,7 @@
 Django settings for app project.
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -122,9 +123,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Centrifugo settings
 # CENTRIFUGO_TOKEN_SECRET is used to create connection and subscription JWT.
 # SECURITY WARNING: make it strong, keep it in secret, never send to the frontend!
-CENTRIFUGO_TOKEN_SECRET = 'secret'
+CENTRIFUGO_TOKEN_SECRET = os.environ['CENTRIFUGO_TOKEN_SECRET']
 # CENTRIFUGO_HTTP_API_ENDPOINT used to set Centrifugo HTTP base endpoint.
 CENTRIFUGO_HTTP_API_ENDPOINT = 'http://centrifugo:8000'
 # CENTRIFUGO_HTTP_API_KEY is used for auth in Centrifugo server HTTP API.
 # SECURITY WARNING: make it strong, keep it in secret!
-CENTRIFUGO_HTTP_API_KEY = 'api_key'
+CENTRIFUGO_HTTP_API_KEY = os.environ['CENTRIFUGO_API_KEY']
