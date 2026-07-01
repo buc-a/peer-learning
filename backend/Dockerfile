@@ -10,6 +10,5 @@ COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY . .
-# TODO: изменить reload режим 
-CMD ["gunicorn",  "app.wsgi", "--reload", "--access-logfile", "-", \
+CMD ["gunicorn", "app.wsgi", "--access-logfile", "-", \
     "--workers", "2", "--bind", "0.0.0.0:8000"]
