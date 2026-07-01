@@ -17,10 +17,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
-from django.db import connection
-connection.force_debug_cursor = True 
-
 from .models import Message, Room, RoomMember
+from .permissions import IsRoomMember
 from .serializers import (
     MessageSerializer, RoomSerializer, RoomMemberSerializer, UserSerializer
 )
@@ -34,7 +32,6 @@ class CentrifugoMixin:
         members = RoomMember.objects.filter(room_id=room_id).values_list('user', flat=True)
         return [f'personal:{user_id}' for user_id in members]
 
-    # разослать сообщение всем участникам чата
     def broadcast_room(self, room, broadcast_payload):
         """Broadcast a payload to all room member channels via Centrifugo HTTP API."""
         def broadcast():
@@ -98,13 +95,18 @@ class UserSearchViewSet(ListModelMixin, GenericViewSet):
 
 
 class MessageListCreateAPIView(ListCreateAPIView, CentrifugoMixin):
-    """List messages in a room or post a new message."""
+    """
+    List messages in a room or post a new message.
+
+    Доступ разрешён только участникам комнаты (IsRoomMember).
+    IsRoomMember проверяет членство по room_id из URL на уровне has_permission,
+    поэтому ручная проверка через get_object_or_404(RoomMember, ...) больше не нужна.
+    """
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsRoomMember]
 
     def get_queryset(self):
         room_id = self.kwargs['room_id']
-        get_object_or_404(RoomMember, user=self.request.user, room_id=room_id)
         return Message.objects.filter(
             room_id=room_id
         ).select_related('user', 'room').order_by('-created_at')
@@ -112,9 +114,9 @@ class MessageListCreateAPIView(ListCreateAPIView, CentrifugoMixin):
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         room_id = self.kwargs['room_id']
-        room = Room.objects.select_for_update().get(id=room_id)
-        # Verify the requesting user is a member.
-        get_object_or_404(RoomMember, user=request.user, room=room)
+        # select_for_update чтобы избежать гонки при обновлении last_message.
+        # get_object_or_404 нужен для возврата 404, если комната не существует.
+        room = get_object_or_404(Room.objects.select_for_update(), id=room_id)
 
         channels = self.get_room_member_channels(room_id)
         serializer = self.get_serializer(data=request.data)
@@ -160,7 +162,6 @@ class StartChatView(APIView, CentrifugoMixin):
             )
 
         # Look for an existing direct room shared by both users (exactly 2 members).
-        # Use distinct=True to avoid inflated counts from multiple JOIN paths.
         existing_room = Room.objects.filter(
             memberships__user=request.user
         ).filter(
@@ -174,7 +175,6 @@ class StartChatView(APIView, CentrifugoMixin):
         # Create a new room named after both participants (sorted alphabetically).
         names = sorted([request.user.username, other_user.username])
         room_name = f'{names[0]}&{names[1]}'
-        # Ensure uniqueness by appending a suffix if needed.
         base_name = room_name
         suffix = 1
         while Room.objects.filter(name=room_name).exists():

@@ -3,8 +3,8 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from django.shortcuts import get_object_or_404
 
+from app.permissions import IsOwnerOrReadOnly
 from .models import Post
 from .serializers import PostSerializer, PostWriteSerializer
 
@@ -53,7 +53,11 @@ class PostDetailView(RetrieveUpdateDestroyAPIView):
     PATCH  /api/posts/<id>/  — partial update (owner only)
     DELETE /api/posts/<id>/  — delete a post (owner only)
     """
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    # IsAuthenticatedOrReadOnly — гарантирует, что анонимы могут только читать.
+    # IsOwnerOrReadOnly — гарантирует, что изменять объект может только его владелец.
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    # IsOwnerOrReadOnly по умолчанию проверяет поле 'author'; явно задаём для ясности.
+    owner_field = 'author'
     queryset = Post.objects.select_related('author').all()
 
     def get_serializer_class(self):
@@ -61,30 +65,14 @@ class PostDetailView(RetrieveUpdateDestroyAPIView):
             return PostWriteSerializer
         return PostSerializer
 
-    def _check_owner(self, post):
-        if post.author != self.request.user:
-            return Response({'detail': 'you are not the author of this post'}, status=status.HTTP_403_FORBIDDEN)
-        return None
-
     def update(self, request, *args, **kwargs):
-        post = self.get_object()
-        err = self._check_owner(post)
-        if err:
-            return err
+        post = self.get_object()  # вызывает check_object_permissions → IsOwnerOrReadOnly
         partial = kwargs.pop('partial', False)
         serializer = self.get_serializer(post, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         updated = serializer.save()
         output = PostSerializer(updated, context={'request': request})
         return Response(output.data)
-
-    def destroy(self, request, *args, **kwargs):
-        post = self.get_object()
-        err = self._check_owner(post)
-        if err:
-            return err
-        post.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class MyPostsView(ListCreateAPIView):
